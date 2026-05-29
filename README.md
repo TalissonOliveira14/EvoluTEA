@@ -29,7 +29,7 @@ O projeto foi modelado seguindo os princípios de POO (SOLID), garantindo baixo 
 
 ## 👥 Integrantes
 * Talisson Oliveira
-* Allson [Sobrenome]
+* Allson Lobato
 
 ---
 *Projeto desenvolvido para a Atividade da Unidade 03 - Professor Jefferson Gomes Dutra.*
