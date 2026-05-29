@@ -1,58 +1,523 @@
 package src.view;
 
 import java.util.Scanner;
+import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import src.model.Paciente;
+import src.model.Responsavel;
+import src.model.Profissional;
+import src.model.Sessao;
+import src.repository.PacienteRepository;
+import src.repository.ResponsavelRepository;
+import src.repository.ProfissionalRepository;
+import src.repository.SessaoRepository;
+import src.exception.CpfInvalidoException;
+import src.exception.EstadoInvalidoException;
 
 public class MenuPrincipal {
     private Scanner scanner;
+    private DateTimeFormatter formatadorData;
+    private PacienteRepository pacienteRepo;
+    private ResponsavelRepository responsavelRepo;
+    private ProfissionalRepository profesionalRepo;
+    private SessaoRepository sessaoRepo;
 
     public MenuPrincipal() {
-        // Corrigido aqui: mudamos para System.in purinho
         this.scanner = new Scanner(System.in);
+        this.formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        this.pacienteRepo = new PacienteRepository();
+        this.responsavelRepo = new ResponsavelRepository();
+        this.profesionalRepo = new ProfissionalRepository();
+        this.sessaoRepo = new SessaoRepository();
     }
 
-    public void exibirMenu() {
+    public void exibir() {
         int opcao = -1;
-
         while (opcao != 0) {
-            System.out.println("\n=================================");
-            System.out.println("        SISTEMA EVOLUTEA         ");
-            System.out.println("=================================");
+            System.out.println("\n=== EVOLUTEA - MENU PRINCIPAL ===");
             System.out.println("1. Gerenciar Pacientes");
-            System.out.println("2. Gerenciar Tutores");
-            System.out.println("3. Gerenciar Especialistas");
-            System.out.println("4. Registrar Evolução/Consulta");
-            System.out.println("0. Sair do Sistema");
+            System.out.println("2. Gerenciar Responsáveis");
+            System.out.println("3. Gerenciar Profissionais");
+            System.out.println("4. Gerenciar Sessões e Evoluções (Máquina de Estados)");
+            System.out.println("0. Sair");
             System.out.print("Escolha uma opção: ");
 
             try {
                 opcao = Integer.parseInt(scanner.nextLine());
-                processarOpcao(opcao);
+                processarOpcaoPrincipal(opcao);
             } catch (NumberFormatException e) {
-                System.out.println("\n[Erro] Por favor, digite apenas números inteiros.");
+                System.out.println("Por favor, digite um número válido!");
             }
         }
     }
 
-    private void processarOpcao(int opcao) {
+    private void processarOpcaoPrincipal(int opcao) {
         switch (opcao) {
-            case 1:
-                System.out.println("\n-> Entrando no menu de Pacientes... (Em desenvolvimento)");
-                break;
-            case 2:
-                System.out.println("\n-> Entrando no menu de Tutores... (Em desenvolvimento)");
-                break;
-            case 3:
-                System.out.println("\n-> Entrando no menu de Especialistas... (Em desenvolvimento)");
-                break;
-            case 4:
-                System.out.println("\n-> Iniciando registro de evolução... (Em desenvolvimento)");
-                break;
-            case 0:
-                System.out.println("\nEncerrando o EvoluTEA. Até logo!");
-                break;
-            default:
-                System.out.println("\n[Aviso] Opção inválida! Escolha um número do menu.");
-                break;
+            case 1: submenuPacientes(); break;
+            case 2: submenuResponsaveis(); break;
+            case 3: submenuProfissionais(); break;
+            case 4: submenuSessoes(); break;
+            case 0: System.out.println("Saindo do sistema... Até logo!"); break;
+            default: System.out.println("Opção inválida! Tente novamente.");
         }
+    }
+
+    private void submenuPacientes() {
+        int opcao = -1;
+        while (opcao != 0) {
+            System.out.println("\n--- MÓDULO: GERENCIAR PACIENTES ---");
+            System.out.println("1. Cadastrar Novo Paciente");
+            System.out.println("2. Listar Todos os Pacientes");
+            System.out.println("3. Editar Ficha de Paciente");
+            System.out.println("4. Deletar Ficha de Paciente");
+            System.out.println("0. Voltar ao Menu Principal");
+            System.out.print("Escolha uma opção: ");
+
+            try {
+                opcao = Integer.parseInt(scanner.nextLine());
+                switch (opcao) {
+                    case 1: formularioPaciente(); break;
+                    case 2: listarPacientes(); break;
+                    case 3: formularioEditarPaciente(); break;
+                    case 4: formularioDeletarPaciente(); break;
+                    case 0: break;
+                    default: System.out.println("Opção inválida!");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Por favor, digite um número válido!");
+            }
+        }
+    }
+
+    private void submenuResponsaveis() {
+        int opcao = -1;
+        while (opcao != 0) {
+            System.out.println("\n--- MÓDULO: GERENCIAR RESPONSÁVEIS ---");
+            System.out.println("1. Cadastrar Novo Responsável");
+            System.out.println("2. Listar Todos os Responsáveis");
+            System.out.println("3. Editar Ficha de Responsável");
+            System.out.println("4. Deletar Ficha de Responsável");
+            System.out.println("0. Voltar ao Menu Principal");
+            System.out.print("Escolha uma opção: ");
+
+            try {
+                opcao = Integer.parseInt(scanner.nextLine());
+                switch (opcao) {
+                    case 1: formularioResponsavel(); break;
+                    case 2: listarResponsaveis(); break;
+                    case 3: formularioEditarResponsavel(); break;
+                    case 4: formularioDeletarResponsavel(); break;
+                    case 0: break;
+                    default: System.out.println("Opção inválida!");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Por favor, digite um número válido!");
+            }
+        }
+    }
+
+    private void submenuProfissionais() {
+        int opcao = -1;
+        while (opcao != 0) {
+            System.out.println("\n--- MÓDULO: GERENCIAR PROFISSIONAIS ---");
+            System.out.println("1. Cadastrar Novo Profissional");
+            System.out.println("2. Listar Todos os Profissionais");
+            System.out.println("3. Editar Ficha de Profissional");
+            System.out.println("4. Deletar Ficha de Profissional");
+            System.out.println("0. Voltar ao Menu Principal");
+            System.out.print("Escolha uma opção: ");
+
+            try {
+                opcao = Integer.parseInt(scanner.nextLine());
+                switch (opcao) {
+                    case 1: formularioProfissional(); break;
+                    case 2: listarProfissionais(); break;
+                    case 3: formularioEditarProfissional(); break;
+                    case 4: formularioDeletarProfissional(); break;
+                    case 0: break;
+                    default: System.out.println("Opção inválida!");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Por favor, digite um número válido!");
+            }
+        }
+    }
+
+    private void submenuSessoes() {
+        int opcao = -1;
+        while (opcao != 0) {
+            System.out.println("\n--- MÓDULO: GESTÃO DE SESSÕES (ESTADO DINÂMICO) ---");
+            System.out.println("1. Agendar Nova Sessão");
+            System.out.println("2. Listar Todas as Sessões (Repasse Polimórfico)");
+            System.out.println("3. Mudar Estado da Sessão (Regras de Transição)");
+            System.out.println("0. Voltar ao Menu Principal");
+            System.out.print("Escolha uma opção: ");
+
+            try {
+                opcao = Integer.parseInt(scanner.nextLine());
+                switch (opcao) {
+                    case 1: formularioSessao(); break;
+                    case 2: listarSessoes(); break;
+                    case 3: formularioAlterarEstadoSessao(); break;
+                    case 0: break;
+                    default: System.out.println("Opção inválida!");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Por favor, digite um número válido!");
+            }
+        }
+    }
+
+    // ==========================================
+    // MÉTODOS DE CADASTRO COM TRATAMENTO DE EXCEÇÃO CUSTOMIZADO
+    // ==========================================
+
+    private void formularioPaciente() {
+        try {
+            System.out.println("\n--- CADASTRO DE PACIENTE ---");
+            List<Responsavel> responsaveis = responsavelRepo.listarTodos();
+            if (responsaveis.isEmpty()) {
+                System.out.println("❌ Erro: Não é possível cadastrar um paciente sem um responsável!");
+                return;
+            }
+
+            System.out.print("ID do Paciente: ");
+            int id = Integer.parseInt(scanner.nextLine());
+            System.out.print("Nome: ");
+            String nome = scanner.nextLine();
+            
+            System.out.print("CPF (Exatamente 11 dígitos): ");
+            String cpf = scanner.nextLine();
+            if (cpf.length() != 11) {
+                throw new CpfInvalidoException("Validação de Dados: O CPF inserido precisa ter 11 dígitos!");
+            }
+
+            System.out.print("Telefone: ");
+            String telefone = scanner.nextLine();
+            System.out.print("Data do Diagnóstico TEA (dd/mm/aaaa): ");
+            LocalDate dataDiag = LocalDate.parse(scanner.nextLine(), formatadorData);
+            System.out.print("Histórico Clínico: ");
+            String historico = scanner.nextLine();
+            System.out.print("Nível de Suporte (1, 2 ou 3): ");
+            String suporte = scanner.nextLine();
+
+            System.out.println("\n--- Selecione o Responsável ---");
+            for (Responsavel r : responsaveis) {
+                System.out.println("ID: " + r.getId() + " | Nome: " + r.getNome());
+            }
+            System.out.print("Digite o ID do Responsável escolhido: ");
+            int idEscolhido = Integer.parseInt(scanner.nextLine());
+
+            Paciente novoPaciente = new Paciente(id, nome, cpf, telefone, dataDiag, historico, suporte, idEscolhido);
+            pacienteRepo.salvar(novoPaciente);
+            System.out.println("🎉 Paciente cadastrado com sucesso!");
+        } catch (CpfInvalidoException e) {
+            System.out.println("❌ ERRO DE VALIDAÇÃO: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("❌ Erro nos dados fornecidos. Operação cancelada.");
+        }
+    }
+
+    private void formularioResponsavel() {
+        try {
+            System.out.println("\n--- CADASTRO DE RESPONSÁVEL ---");
+            System.out.print("ID: ");
+            int id = Integer.parseInt(scanner.nextLine());
+            System.out.print("Nome: ");
+            String nome = scanner.nextLine();
+            
+            System.out.print("CPF (Exatamente 11 dígitos): ");
+            String cpf = scanner.nextLine();
+            if (cpf.length() != 11) {
+                throw new CpfInvalidoException("Validação de Dados: CPF do responsável precisa ter 11 dígitos!");
+            }
+
+            System.out.print("Telefone: ");
+            String telefone = scanner.nextLine();
+            System.out.print("E-mail: ");
+            String email = scanner.nextLine();
+            System.out.print("Grau de Parentesco: ");
+            String parentesco = scanner.nextLine();
+
+            Responsavel novoResp = new Responsavel(id, nome, cpf, telefone, email, parentesco);
+            responsavelRepo.salvar(novoResp);
+            System.out.println("🎉 Responsável cadastrado com sucesso!");
+        } catch (CpfInvalidoException e) {
+            System.out.println("❌ ERRO DE VALIDAÇÃO: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("❌ Ocorreu um erro no preenchimento.");
+        }
+    }
+
+    private void formularioProfissional() {
+        try {
+            System.out.println("\n--- CADASTRO DE PROFISSIONAL ---");
+            System.out.print("ID: ");
+            int id = Integer.parseInt(scanner.nextLine());
+            System.out.print("Nome: ");
+            String nome = scanner.nextLine();
+            
+            System.out.print("CPF (Exatamente 11 dígitos): ");
+            String cpf = scanner.nextLine();
+            if (cpf.length() != 11) {
+                throw new CpfInvalidoException("Validação de Dados: CPF do profissional incorreto!");
+            }
+
+            System.out.print("Telefone: ");
+            String telefone = scanner.nextLine();
+            System.out.print("Registro Profissional (CRP/CRM): ");
+            String registro = scanner.nextLine();
+            System.out.print("Especialidade: ");
+            String especialidade = scanner.nextLine();
+
+            Profissional novoProf = new Profissional(id, nome, cpf, telefone, registro, especialidade);
+            profesionalRepo.salvar(novoProf);
+            System.out.println("🎉 Profissional cadastrado com sucesso!");
+        } catch (CpfInvalidoException e) {
+            System.out.println("❌ ERRO DE VALIDAÇÃO: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("❌ Falha de entrada de dados.");
+        }
+    }
+
+    private void formularioSessao() {
+        try {
+            System.out.println("\n--- AGENDAMENTO DE SESSÃO ---");
+            System.out.print("ID da Sessão: ");
+            int id = Integer.parseInt(scanner.nextLine());
+            System.out.print("ID do Paciente: ");
+            int idPac = Integer.parseInt(scanner.nextLine());
+            System.out.print("ID do Profissional: ");
+            int idProf = Integer.parseInt(scanner.nextLine());
+            System.out.print("Data da Sessão (dd/mm/aaaa): ");
+            String data = scanner.nextLine();
+            System.out.print("Valor Base da Consulta: R$ ");
+            double valor = Double.parseDouble(scanner.nextLine());
+            System.out.print("Tipo de Atendimento (PARTICULAR ou PLANO): ");
+            String tipo = scanner.nextLine();
+
+            Sessao novaSessao = new Sessao(id, idPac, idProf, data, valor, tipo);
+            sessaoRepo.salvar(novaSessao);
+            System.out.println("🎉 Sessão agendada! Estado inicial: [AGENDADA]");
+        } catch (Exception e) {
+            System.out.println("❌ Erro ao processar o agendamento.");
+        }
+    }
+
+    // ==========================================
+    // MÉTODOS DE EXIBIÇÃO / LISTAGEM
+    // ==========================================
+
+    private void listarPacientes() {
+        System.out.println("\n=== LISTA DE PACIENTES CADASTRADOS ===");
+        List<Paciente> pacientes = pacienteRepo.listarTodos();
+        if (pacientes.isEmpty()) { System.out.println("Nenhum paciente encontrado."); return; }
+        for (Paciente p : pacientes) {
+            System.out.println("ID: " + p.getId() + " | Nome: " + p.getNome() + " | Suporte: Nível " + p.getNecessidadeSuporte());
+        }
+    }
+
+    private void listarResponsaveis() {
+        System.out.println("\n=== LISTA DE RESPONSÁVEIS CADASTRADOS ===");
+        List<Responsavel> responsaveis = responsavelRepo.listarTodos();
+        if (responsaveis.isEmpty()) { System.out.println("Nenhum responsável encontrado."); return; }
+        for (Responsavel r : responsaveis) {
+            System.out.println("ID: " + r.getId() + " | Nome: " + r.getNome() + " | Grau: " + r.getGrauParentesco());
+        }
+    }
+
+    private void listarProfissionais() {
+        System.out.println("\n=== LISTA DE PROFISSIONAIS CADASTRADOS ===");
+        List<Profissional> profissionais = profesionalRepo.listarTodos();
+        if (profissionais.isEmpty()) { System.out.println("Nenhum profissional encontrado."); return; }
+        for (Profissional p : profissionais) {
+            System.out.println("ID: " + p.getId() + " | Nome: " + p.getNome() + " | Especialidade: " + p.getEspecialidade());
+        }
+    }
+
+    private void listarSessoes() {
+        System.out.println("\n=== HISTÓRICO DE SESSÕES (APLICAÇÃO DE POLIMORFISMO) ===");
+        List<Sessao> sessoes = sessaoRepo.listarTodas();
+        if (sessoes.isEmpty()) { System.out.println("Nenhuma sessão registrada no histórico."); return; }
+        for (Sessao s : sessoes) {
+            System.out.println("ID: " + s.getId() + " | Paciente ID: " + s.getIdPaciente() + " | Data: " + s.getData() + " | Tipo: " + s.getTipoAtendimento());
+            System.out.println("🔄 Estado Atual: [" + s.getEstado() + "]");
+            System.out.println("💰 Valor Base: R$ " + s.getValorBase() + " -> Repasse Líquido (Polimórfico): R$ " + s.getValorLiquidoProfissional());
+            System.out.println("----------------------------------------------------------------");
+        }
+    }
+
+    // ==========================================
+    // TRANSIÇÃO DE ESTADOS DA MÁQUINA DE ESTADOS
+    // ==========================================
+
+    private void formularioAlterarEstadoSessao() {
+        System.out.println("\n--- ALTERAÇÃO DE ESTADO DA SESSÃO ---");
+        List<Sessao> sessoes = sessaoRepo.listarTodas();
+        if (sessoes.isEmpty()) { System.out.println("Nenhuma sessão no sistema."); return; }
+
+        System.out.print("Digite o ID da sessão que deseja alterar: ");
+        int id = Integer.parseInt(scanner.nextLine());
+
+        Sessao alvo = null;
+        for (Sessao s : sessoes) { if (s.getId() == id) { alvo = s; break; } }
+        if (alvo == null) { System.out.println("Sessão não encontrada!"); return; }
+
+        System.out.println("Estado atual da sessão: [" + alvo.getEstado() + "]");
+        System.out.print("Digite o novo Estado (REALIZADA, EVOLUIDA, CANCELADA): ");
+        String novoEstado = scanner.nextLine();
+
+        try {
+            // Invoca a lógica interna do modelo que valida as regras de transição de POO
+            alvo.transicionarPara(novoEstado);
+            sessaoRepo.salvarTodas(sessoes);
+            System.out.println("🎉 Sucesso! A sessão mudou de estado para: [" + alvo.getEstado() + "]");
+        } catch (EstadoInvalidoException e) {
+            System.out.println("\n❌ REGRA DE NEGÓCIO BARRADA (Exceção Capturada):");
+            System.out.println(e.getMessage());
+        }
+    }
+
+    // ==========================================
+    // MÉTODOS DE EDIÇÃO E EXCLUSÃO DE PACIENTE
+    // ==========================================
+
+    private void formularioEditarPaciente() {
+        System.out.println("\n--- EDIÇÃO DE FICHA DE PACIENTE ---");
+        System.out.print("Digite o ID do paciente que deseja alterar: ");
+        int id = Integer.parseInt(scanner.nextLine());
+
+        List<Paciente> pacientes = pacienteRepo.listarTodos();
+        Paciente alvo = null;
+        for (Paciente p : pacientes) { if (p.getId() == id) { alvo = p; break; } }
+        if (alvo == null) { System.out.println("⚠️ Paciente não encontrado."); return; }
+
+        System.out.print("Nome atual [" + alvo.getNome() + "]: ");
+        String nome = scanner.nextLine(); if(nome.isEmpty()) nome = alvo.getNome();
+
+        System.out.print("CPF atual [" + alvo.getCpf() + "]: ");
+        String cpf = scanner.nextLine(); if(cpf.isEmpty()) cpf = alvo.getCpf();
+
+        System.out.print("Telefone atual [" + alvo.getTelefone() + "]: ");
+        String telefone = scanner.nextLine(); if(telefone.isEmpty()) telefone = alvo.getTelefone();
+
+        System.out.print("Data Diagnóstico [" + alvo.getDataDiagnosticoTEA().format(formatadorData) + "]: ");
+        String dataStr = scanner.nextLine();
+        LocalDate dataDiag = dataStr.isEmpty() ? alvo.getDataDiagnosticoTEA() : LocalDate.parse(dataStr, formatadorData);
+
+        System.out.print("Histórico Clínico [" + alvo.getHistoricoClinico() + "]: ");
+        String historico = scanner.nextLine(); if(historico.isEmpty()) historico = alvo.getHistoricoClinico();
+
+        System.out.print("Suporte [" + alvo.getNecessidadeSuporte() + "]: ");
+        String suporte = scanner.nextLine(); if(suporte.isEmpty()) suporte = alvo.getNecessidadeSuporte();
+
+        List<Responsavel> responsaveis = responsavelRepo.listarTodos();
+        System.out.println("\n--- Responsáveis Disponíveis ---");
+        for (Responsavel r : responsaveis) { System.out.println("ID: " + r.getId() + " | Nome: " + r.getNome()); }
+
+        System.out.print("ID do Responsável (" + alvo.getIdResponsavel() + "): ");
+        String idRespStr = scanner.nextLine();
+        int idEscolhido = idRespStr.isEmpty() ? alvo.getIdResponsavel() : Integer.parseInt(idRespStr);
+
+        Paciente updated = new Paciente(id, nome, cpf, telefone, dataDiag, historico, suporte, idEscolhido);
+        if (pacienteRepo.atualizar(updated)) System.out.println("✅ Ficha médica do paciente alterada!");
+    }
+
+    private void formularioDeletarPaciente() {
+        System.out.print("\nDigite o ID do paciente para remover: ");
+        int id = Integer.parseInt(scanner.nextLine());
+        if (pacienteRepo.deletarPorId(id)) System.out.println("🗑️ Ficha excluída do arquivo!");
+        else System.out.println("⚠️ ID não encontrado.");
+    }
+
+    // ==========================================
+    // MÉTODOS DE EDIÇÃO E EXCLUSÃO DE RESPONSÁVEL
+    // ==========================================
+
+    private void formularioEditarResponsavel() {
+        System.out.println("\n--- EDIÇÃO DE FICHA DE RESPONSÁVEL ---");
+        System.out.print("Digite o ID do responsável que deseja alterar: ");
+        int id = Integer.parseInt(scanner.nextLine());
+
+        List<Responsavel> responsaveis = responsavelRepo.listarTodos();
+        Responsavel alvo = null;
+        for (Responsavel r : responsaveis) { if (r.getId() == id) { alvo = r; break; } }
+        if (alvo == null) { System.out.println("⚠️ Responsável não encontrado."); return; }
+
+        System.out.print("Nome atual [" + alvo.getNome() + "]: ");
+        String nome = scanner.nextLine(); if(nome.isEmpty()) nome = alvo.getNome();
+
+        System.out.print("CPF atual [" + alvo.getCpf() + "]: ");
+        String cpf = scanner.nextLine(); if(cpf.isEmpty()) cpf = alvo.getCpf();
+
+        System.out.print("Telefone atual [" + alvo.getTelefone() + "]: ");
+        String telefone = scanner.nextLine(); if(telefone.isEmpty()) telefone = alvo.getTelefone();
+
+        System.out.print("E-mail atual [" + alvo.getEmail() + "]: ");
+        String email = scanner.nextLine(); if(email.isEmpty()) email = alvo.getEmail();
+
+        System.out.print("Grau de Parentesco atual [" + alvo.getGrauParentesco() + "]: ");
+        String parentesco = scanner.nextLine(); if(parentesco.isEmpty()) parentesco = alvo.getGrauParentesco();
+
+        Responsavel updated = new Responsavel(id, nome, cpf, telefone, email, parentesco);
+        if (responsavelRepo.atualizar(updated)) System.out.println("✅ Ficha do responsável alterada com sucesso!");
+    }
+
+    private void formularioDeletarResponsavel() {
+        System.out.print("\nDigite o ID do responsável para remover: ");
+        int id = Integer.parseInt(scanner.nextLine());
+        
+        // Impede a deleção se houver vínculos com pacientes (Item 1.c - Regra de Negócio)
+        List<Paciente> pacientes = pacienteRepo.listarTodos();
+        for (Paciente p : pacientes) {
+            if (p.getIdResponsavel() == id) {
+                System.out.println("❌ Erro: Não é possível deletar este responsável pois ele possui o paciente '" + p.getNome() + "' vinculado!");
+                return;
+            }
+        }
+        
+        if (responsavelRepo.deletarPorId(id)) System.out.println("🗑️ Responsável excluído do arquivo!");
+        else System.out.println("⚠️ ID não encontrado.");
+    }
+
+    // ==========================================
+    // MÉTODOS DE EDIÇÃO E EXCLUSÃO DE PROFISSIONAL
+    // ==========================================
+
+    private void formularioEditarProfissional() {
+        System.out.println("\n--- EDIÇÃO DE FICHA DE PROFISSIONAL ---");
+        System.out.print("Digite o ID do profissional que deseja alterar: ");
+        int id = Integer.parseInt(scanner.nextLine());
+
+        List<Profissional> profissionais = profesionalRepo.listarTodos();
+        Profissional alvo = null;
+        for (Profissional p : profissionais) { if (p.getId() == id) { alvo = p; break; } }
+        if (alvo == null) { System.out.println("⚠️ Profissional não encontrado."); return; }
+
+        System.out.print("Nome atual [" + alvo.getNome() + "]: ");
+        String nome = scanner.nextLine(); if(nome.isEmpty()) nome = alvo.getNome();
+
+        System.out.print("CPF atual [" + alvo.getCpf() + "]: ");
+        String cpf = scanner.nextLine(); if(cpf.isEmpty()) cpf = alvo.getCpf();
+
+        System.out.print("Telefone atual [" + alvo.getTelefone() + "]: ");
+        String telefone = scanner.nextLine(); if(telefone.isEmpty()) telefone = alvo.getTelefone();
+
+        System.out.print("Registro Profissional atual [" + alvo.getRegistroProfissional() + "]: ");
+        String registro = scanner.nextLine(); if(registro.isEmpty()) registro = alvo.getRegistroProfissional();
+
+        System.out.print("Especialidade atual [" + alvo.getEspecialidade() + "]: ");
+        String esp = scanner.nextLine(); if(esp.isEmpty()) esp = alvo.getEspecialidade();
+
+        Profissional updated = new Profissional(id, nome, cpf, telefone, registro, esp);
+        if (profesionalRepo.atualizar(updated)) System.out.println("✅ Cadastro do profissional atualizado!");
+    }
+
+    private void formularioDeletarProfissional() {
+        System.out.print("\nDigite o ID do profissional para remover: ");
+        int id = Integer.parseInt(scanner.nextLine());
+        if (profesionalRepo.deletarPorId(id)) System.out.println("🗑️ Profissional removido do arquivo!");
+        else System.out.println("⚠️ ID não encontrado.");
     }
 }
