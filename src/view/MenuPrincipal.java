@@ -1,5 +1,6 @@
 package src.view;
 
+import src.service.RelatorioService;
 import java.util.Scanner;
 import java.util.List;
 import java.time.LocalDate;
@@ -14,6 +15,7 @@ import src.repository.ProfissionalRepository;
 import src.repository.SessaoRepository;
 import src.exception.CpfInvalidoException;
 import src.exception.EstadoInvalidoException;
+import src.util.CpfValidator;
 
 public class MenuPrincipal {
     private Scanner scanner;
@@ -32,6 +34,11 @@ public class MenuPrincipal {
         this.sessaoRepo = new SessaoRepository();
     }
 
+    public static void main(String[] args) {
+        MenuPrincipal menu = new MenuPrincipal();
+        menu.exibir();
+    }
+
     public void exibir() {
         int opcao = -1;
         while (opcao != 0) {
@@ -40,6 +47,7 @@ public class MenuPrincipal {
             System.out.println("2. Gerenciar Responsáveis");
             System.out.println("3. Gerenciar Profissionais");
             System.out.println("4. Gerenciar Sessões e Evoluções (Máquina de Estados)");
+            System.out.println("5. Relatórios Gerenciais");
             System.out.println("0. Sair");
             System.out.print("Escolha uma opção: ");
 
@@ -58,12 +66,15 @@ public class MenuPrincipal {
             case 2: submenuResponsaveis(); break;
             case 3: submenuProfissionais(); break;
             case 4: submenuSessoes(); break;
+            case 5: RelatorioService.exibirPacientesPorNivel(pacienteRepo.listarTodos());
+                    RelatorioService.exibirFaturamentoSessoes(sessaoRepo.listarTodas());
+                    break;
             case 0: System.out.println("Saindo do sistema... Até logo!"); break;
             default: System.out.println("Opção inválida! Tente novamente.");
         }
     }
 
-    private void submenuPacientes() {
+   private void submenuPacientes() {
         int opcao = -1;
         while (opcao != 0) {
             System.out.println("\n--- MÓDULO: GERENCIAR PACIENTES ---");
@@ -75,21 +86,44 @@ public class MenuPrincipal {
             System.out.print("Escolha uma opção: ");
 
             try {
-                opcao = Integer.parseInt(scanner.nextLine());
+                String input = scanner.nextLine();
+                opcao = Integer.parseInt(input);
+                
                 switch (opcao) {
-                    case 1: formularioPaciente(); break;
-                    case 2: listarPacientes(); break;
-                    case 3: formularioEditarPaciente(); break;
-                    case 4: formularioDeletarPaciente(); break;
-                    case 0: break;
-                    default: System.out.println("Opção inválida!");
+                    case 1: 
+                        try {
+                            formularioPaciente();
+                        } catch (src.exception.CpfInvalidoException e) {
+                            System.out.println("\n❌ ERRO DE VALIDAÇÃO: " + e.getMessage());
+                        } catch (Exception e) {
+                            System.out.println("\n❌ Ocorreu um erro inesperado: " + e.getMessage());
+                        }
+                        break;
+                    case 2: 
+                        listarPacientes(); 
+                        break;
+                    case 3: 
+                        try {
+                            formularioEditarPaciente();
+                        } catch (src.exception.CpfInvalidoException e) {
+                            System.out.println("\n❌ ERRO DE VALIDAÇÃO: " + e.getMessage());
+                        } catch (Exception e) {
+                            System.out.println("\n❌ Ocorreu um erro inesperado: " + e.getMessage());
+                        }
+                        break;
+                    case 4: 
+                        formularioDeletarPaciente(); 
+                        break;
+                    case 0: 
+                        break;
+                    default: 
+                        System.out.println("Opção inválida!");
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Por favor, digite um número válido!");
             }
         }
     }
-
     private void submenuResponsaveis() {
         int opcao = -1;
         while (opcao != 0) {
@@ -173,112 +207,108 @@ public class MenuPrincipal {
     // MÉTODOS DE CADASTRO COM TRATAMENTO DE EXCEÇÃO CUSTOMIZADO
     // ==========================================
 
-    private void formularioPaciente() {
-        try {
-            System.out.println("\n--- CADASTRO DE PACIENTE ---");
+private void formularioPaciente() {
+        System.out.println("\n--- CADASTRO DE PACIENTE ---");
+
+        // 1. Definição do Responsável
+        System.out.print("O paciente possui um representante legal cadastrado? (S/N): ");
+        String possuiResponsavel = scanner.nextLine();
+        
+        int idEscolhido = 0; 
+        if (possuiResponsavel.equalsIgnoreCase("S")) {
             List<Responsavel> responsaveis = responsavelRepo.listarTodos();
             if (responsaveis.isEmpty()) {
-                System.out.println("❌ Erro: Não é possível cadastrar um paciente sem um responsável!");
+                System.out.println("❌ Erro: Não há responsáveis cadastrados.");
                 return;
             }
-
-            System.out.print("ID do Paciente: ");
-            int id = Integer.parseInt(scanner.nextLine());
-            System.out.print("Nome: ");
-            String nome = scanner.nextLine();
-            
-            System.out.print("CPF (Exatamente 11 dígitos): ");
-            String cpf = scanner.nextLine();
-            if (cpf.length() != 11) {
-                throw new CpfInvalidoException("Validação de Dados: O CPF inserido precisa ter 11 dígitos!");
-            }
-
-            System.out.print("Telefone: ");
-            String telefone = scanner.nextLine();
-            System.out.print("Data do Diagnóstico TEA (dd/mm/aaaa): ");
-            LocalDate dataDiag = LocalDate.parse(scanner.nextLine(), formatadorData);
-            System.out.print("Histórico Clínico: ");
-            String historico = scanner.nextLine();
-            System.out.print("Nível de Suporte (1, 2 ou 3): ");
-            String suporte = scanner.nextLine();
-
-            System.out.println("\n--- Selecione o Responsável ---");
-            for (Responsavel r : responsaveis) {
-                System.out.println("ID: " + r.getId() + " | Nome: " + r.getNome());
-            }
             System.out.print("Digite o ID do Responsável escolhido: ");
-            int idEscolhido = Integer.parseInt(scanner.nextLine());
-
-            Paciente novoPaciente = new Paciente(id, nome, cpf, telefone, dataDiag, historico, suporte, idEscolhido);
-            pacienteRepo.salvar(novoPaciente);
-            System.out.println("🎉 Paciente cadastrado com sucesso!");
-        } catch (CpfInvalidoException e) {
-            System.out.println("❌ ERRO DE VALIDAÇÃO: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("❌ Erro nos dados fornecidos. Operação cancelada.");
+            idEscolhido = Integer.parseInt(scanner.nextLine());
         }
+
+        // 2. Coleta dos dados
+        System.out.print("ID do Paciente: ");
+        int id = Integer.parseInt(scanner.nextLine());
+        System.out.print("Nome: ");
+        String nome = scanner.nextLine();
+        
+        // Loop de validação: ele não deixa passar enquanto o CPF for inválido
+        String cpf;
+        do {
+            System.out.print("CPF: ");
+            cpf = scanner.nextLine();
+            if (!CpfValidator.isCpfValido(cpf)) {
+                System.out.println("❌ ERRO: CPF inválido. Por favor, digite novamente.");
+            }
+        } while (!CpfValidator.isCpfValido(cpf));
+
+        System.out.print("Telefone: ");
+        String telefone = scanner.nextLine();
+        System.out.print("Data do Diagnóstico (dd/mm/aaaa): ");
+        LocalDate dataDiag = LocalDate.parse(scanner.nextLine(), formatadorData);
+        System.out.print("Histórico Clínico: ");
+        String historico = scanner.nextLine();
+        System.out.print("Nível de Suporte (1, 2 ou 3): ");
+        String suporte = scanner.nextLine();
+
+        Paciente novoPaciente = new Paciente(id, nome, cpf, telefone, dataDiag, historico, suporte, idEscolhido);
+        pacienteRepo.salvar(novoPaciente);
+        System.out.println("🎉 Paciente cadastrado com sucesso!");
     }
 
     private void formularioResponsavel() {
-        try {
-            System.out.println("\n--- CADASTRO DE RESPONSÁVEL ---");
-            System.out.print("ID: ");
-            int id = Integer.parseInt(scanner.nextLine());
-            System.out.print("Nome: ");
-            String nome = scanner.nextLine();
-            
-            System.out.print("CPF (Exatamente 11 dígitos): ");
-            String cpf = scanner.nextLine();
-            if (cpf.length() != 11) {
-                throw new CpfInvalidoException("Validação de Dados: CPF do responsável precisa ter 11 dígitos!");
+        System.out.println("\n--- CADASTRO DE RESPONSÁVEL ---");
+        System.out.print("ID: ");
+        int id = Integer.parseInt(scanner.nextLine());
+        System.out.print("Nome: ");
+        String nome = scanner.nextLine();
+        
+        String cpf;
+        do {
+            System.out.print("CPF: ");
+            cpf = scanner.nextLine();
+            if (!CpfValidator.isCpfValido(cpf)) {
+                System.out.println("❌ ERRO: CPF inválido. Por favor, digite novamente.");
             }
+        } while (!CpfValidator.isCpfValido(cpf));
 
-            System.out.print("Telefone: ");
-            String telefone = scanner.nextLine();
-            System.out.print("E-mail: ");
-            String email = scanner.nextLine();
-            System.out.print("Grau de Parentesco: ");
-            String parentesco = scanner.nextLine();
+        System.out.print("Telefone: ");
+        String telefone = scanner.nextLine();
+        System.out.print("E-mail: ");
+        String email = scanner.nextLine();
+        System.out.print("Grau de Parentesco: ");
+        String parentesco = scanner.nextLine();
 
-            Responsavel novoResp = new Responsavel(id, nome, cpf, telefone, email, parentesco);
-            responsavelRepo.salvar(novoResp);
-            System.out.println("🎉 Responsável cadastrado com sucesso!");
-        } catch (CpfInvalidoException e) {
-            System.out.println("❌ ERRO DE VALIDAÇÃO: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("❌ Ocorreu um erro no preenchimento.");
-        }
+        Responsavel novoResp = new Responsavel(id, nome, cpf, telefone, email, parentesco);
+        responsavelRepo.salvar(novoResp);
+        System.out.println("🎉 Responsável cadastrado com sucesso!");
     }
 
     private void formularioProfissional() {
-        try {
-            System.out.println("\n--- CADASTRO DE PROFISSIONAL ---");
-            System.out.print("ID: ");
-            int id = Integer.parseInt(scanner.nextLine());
-            System.out.print("Nome: ");
-            String nome = scanner.nextLine();
-            
-            System.out.print("CPF (Exatamente 11 dígitos): ");
-            String cpf = scanner.nextLine();
-            if (cpf.length() != 11) {
-                throw new CpfInvalidoException("Validação de Dados: CPF do profissional incorreto!");
+        System.out.println("\n--- CADASTRO DE PROFISSIONAL ---");
+        System.out.print("ID: ");
+        int id = Integer.parseInt(scanner.nextLine());
+        System.out.print("Nome: ");
+        String nome = scanner.nextLine();
+        
+        String cpf;
+        do {
+            System.out.print("CPF: ");
+            cpf = scanner.nextLine();
+            if (!CpfValidator.isCpfValido(cpf)) {
+                System.out.println("❌ ERRO: CPF inválido. Por favor, digite novamente.");
             }
+        } while (!CpfValidator.isCpfValido(cpf));
 
-            System.out.print("Telefone: ");
-            String telefone = scanner.nextLine();
-            System.out.print("Registro Profissional (CRP/CRM): ");
-            String registro = scanner.nextLine();
-            System.out.print("Especialidade: ");
-            String especialidade = scanner.nextLine();
+        System.out.print("Telefone: ");
+        String telefone = scanner.nextLine();
+        System.out.print("Registro Profissional (CRP/CRM): ");
+        String registro = scanner.nextLine();
+        System.out.print("Especialidade: ");
+        String especialidade = scanner.nextLine();
 
-            Profissional novoProf = new Profissional(id, nome, cpf, telefone, registro, especialidade);
-            profesionalRepo.salvar(novoProf);
-            System.out.println("🎉 Profissional cadastrado com sucesso!");
-        } catch (CpfInvalidoException e) {
-            System.out.println("❌ ERRO DE VALIDAÇÃO: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("❌ Falha de entrada de dados.");
-        }
+        Profissional novoProf = new Profissional(id, nome, cpf, telefone, registro, especialidade);
+        profesionalRepo.salvar(novoProf);
+        System.out.println("🎉 Profissional cadastrado com sucesso!");
     }
 
     private void formularioSessao() {
@@ -342,7 +372,7 @@ public class MenuPrincipal {
         if (sessoes.isEmpty()) { System.out.println("Nenhuma sessão registrada no histórico."); return; }
         for (Sessao s : sessoes) {
             System.out.println("ID: " + s.getId() + " | Paciente ID: " + s.getIdPaciente() + " | Data: " + s.getData() + " | Tipo: " + s.getTipoAtendimento());
-            System.out.println("🔄 Estado Atual: [" + s.getEstado() + "]");
+            System.out.println("🔄 Estado Atual: [" + s.getNomeEstado() + "]");
             System.out.println("💰 Valor Base: R$ " + s.getValorBase() + " -> Repasse Líquido (Polimórfico): R$ " + s.getValorLiquidoProfissional());
             System.out.println("----------------------------------------------------------------");
         }
@@ -364,15 +394,15 @@ public class MenuPrincipal {
         for (Sessao s : sessoes) { if (s.getId() == id) { alvo = s; break; } }
         if (alvo == null) { System.out.println("Sessão não encontrada!"); return; }
 
-        System.out.println("Estado atual da sessão: [" + alvo.getEstado() + "]");
+        System.out.println("Estado atual da sessão: [" + alvo.getNomeEstado() + "]");
         System.out.print("Digite o novo Estado (REALIZADA, EVOLUIDA, CANCELADA): ");
         String novoEstado = scanner.nextLine();
 
         try {
             // Invoca a lógica interna do modelo que valida as regras de transição de POO
-            alvo.transicionarPara(novoEstado);
+            alvo.avancarFluxo(); // Chama o padrão State para mudar o estado
             sessaoRepo.salvarTodas(sessoes);
-            System.out.println("🎉 Sucesso! A sessão mudou de estado para: [" + alvo.getEstado() + "]");
+            System.out.println("🎉 Sucesso! A sessão mudou de estado para: [" + alvo.getNomeEstado() + "]");
         } catch (EstadoInvalidoException e) {
             System.out.println("\n❌ REGRA DE NEGÓCIO BARRADA (Exceção Capturada):");
             System.out.println(e.getMessage());

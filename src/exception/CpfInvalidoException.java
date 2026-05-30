@@ -1,6 +1,6 @@
 package src.exception;
 
-public class CpfInvalidoException extends Exception {
+public class CpfInvalidoException extends RuntimeException {
     public CpfInvalidoException(String mensagem) {
         super(mensagem);
     }
