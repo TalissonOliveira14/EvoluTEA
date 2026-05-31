@@ -35,10 +35,10 @@ public class Sessao {
 
     public int getId() { return id; }
     public int getIdPaciente() { return idPaciente; }
+    public int getIdProfissional() { return idProfissional; }
     public String getData() { return data; }
     public double getValorBase() { return valorBase; }
     public String getTipoAtendimento() { return tipoAtendimento; }
-    
     public double getValorLiquidoProfissional() {
         return this.valorBase * 0.7;
     }

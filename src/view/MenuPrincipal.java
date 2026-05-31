@@ -9,11 +9,11 @@ import src.model.Paciente;
 import src.model.Responsavel;
 import src.model.Profissional;
 import src.model.Sessao;
+import src.model.estados.EstadoCancelada;
 import src.repository.PacienteRepository;
 import src.repository.ResponsavelRepository;
 import src.repository.ProfissionalRepository;
 import src.repository.SessaoRepository;
-import src.exception.CpfInvalidoException;
 import src.exception.EstadoInvalidoException;
 import src.util.CpfValidator;
 
@@ -74,56 +74,111 @@ public class MenuPrincipal {
         }
     }
 
-   private void submenuPacientes() {
-        int opcao = -1;
-        while (opcao != 0) {
-            System.out.println("\n--- MÓDULO: GERENCIAR PACIENTES ---");
-            System.out.println("1. Cadastrar Novo Paciente");
-            System.out.println("2. Listar Todos os Pacientes");
-            System.out.println("3. Editar Ficha de Paciente");
-            System.out.println("4. Deletar Ficha de Paciente");
-            System.out.println("0. Voltar ao Menu Principal");
-            System.out.print("Escolha uma opção: ");
+   private void formularioEditarPaciente() {
+        System.out.println("\n--- MÓDULO: EDITAR PACIENTE ---");
+        System.out.print("Digite o ID do paciente que deseja editar: ");
+        int id = Integer.parseInt(scanner.nextLine());
 
-            try {
-                String input = scanner.nextLine();
-                opcao = Integer.parseInt(input);
-                
-                switch (opcao) {
-                    case 1: 
-                        try {
-                            formularioPaciente();
-                        } catch (src.exception.CpfInvalidoException e) {
-                            System.out.println("\n❌ ERRO DE VALIDAÇÃO: " + e.getMessage());
-                        } catch (Exception e) {
-                            System.out.println("\n❌ Ocorreu um erro inesperado: " + e.getMessage());
-                        }
-                        break;
-                    case 2: 
-                        listarPacientes(); 
-                        break;
-                    case 3: 
-                        try {
-                            formularioEditarPaciente();
-                        } catch (src.exception.CpfInvalidoException e) {
-                            System.out.println("\n❌ ERRO DE VALIDAÇÃO: " + e.getMessage());
-                        } catch (Exception e) {
-                            System.out.println("\n❌ Ocorreu um erro inesperado: " + e.getMessage());
-                        }
-                        break;
-                    case 4: 
-                        formularioDeletarPaciente(); 
-                        break;
-                    case 0: 
-                        break;
-                    default: 
-                        System.out.println("Opção inválida!");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Por favor, digite um número válido!");
+        // Busca o paciente pelo ID
+        Paciente alvo = null;
+        for (Paciente p : pacienteRepo.listarTodos()) {
+            if (p.getId() == id) {
+                alvo = p;
+                break;
             }
         }
+
+        if (alvo == null) {
+            System.out.println("❌ Paciente com ID " + id + " não encontrado.");
+            return;
+        }
+
+        // Solicitação dos dados para atualização
+        System.out.println("Editando paciente: " + alvo.getNome());
+        System.out.print("Novo Nome (ou vazio para manter): ");
+        String novoNome = scanner.nextLine();
+        String nome = novoNome.isEmpty() ? alvo.getNome() : novoNome;
+
+        System.out.print("Novo Telefone (ou vazio para manter): ");
+        String novoTelefone = scanner.nextLine();
+        String telefone = novoTelefone.isEmpty() ? alvo.getTelefone() : novoTelefone;
+
+        // Atualiza o objeto com os novos dados
+        Paciente pacienteAtualizado = new Paciente(
+            alvo.getId(), 
+            nome, 
+            alvo.getCpf(), 
+            telefone, 
+            alvo.getDataDiagnosticoTEA(), 
+            alvo.getHistoricoClinico(), 
+            alvo.getNecessidadeSuporte(), 
+            alvo.getIdResponsavel()
+        );
+
+        if (pacienteRepo.atualizar(pacienteAtualizado)) {
+            System.out.println("✅ Paciente atualizado com sucesso!");
+        } else {
+            System.out.println("❌ Erro ao salvar as alterações.");
+        }
     }
+
+    private void formularioDeletarPaciente() {
+        System.out.println("\n--- MÓDULO: DELETAR PACIENTE ---");
+        System.out.print("Digite o ID do paciente para remover: ");
+        int id = Integer.parseInt(scanner.nextLine());
+
+        if (pacienteRepo.deletarPorId(id)) {
+            System.out.println("🗑️ Paciente removido com sucesso!");
+        } else {
+            System.out.println("❌ Erro: Paciente não encontrado ou falha na remoção.");
+        }
+    }
+
+    private void submenuPacientes() {
+    int opcao = -1;
+
+    while (opcao != 0) {
+        System.out.println("\n--- MÓDULO: GERENCIAR PACIENTES ---");
+        System.out.println("1. Cadastrar Novo Paciente");
+        System.out.println("2. Listar Todos os Pacientes");
+        System.out.println("3. Editar Ficha de Paciente");
+        System.out.println("4. Deletar Ficha de Paciente");
+        System.out.println("0. Voltar ao Menu Principal");
+        System.out.print("Escolha uma opção: ");
+
+        try {
+            opcao = Integer.parseInt(scanner.nextLine());
+
+            switch (opcao) {
+                case 1:
+                    formularioPaciente();
+                    break;
+
+                case 2:
+                    listarPacientes();
+                    break;
+
+                case 3:
+                    formularioEditarPaciente();
+                    break;
+
+                case 4:
+                    formularioDeletarPaciente();
+                    break;
+
+                case 0:
+                    break;
+
+                default:
+                    System.out.println("Opção inválida!");
+            }
+
+        } catch (NumberFormatException e) {
+            System.out.println("Por favor, digite um número válido!");
+        }
+      }
+    }
+
     private void submenuResponsaveis() {
         int opcao = -1;
         while (opcao != 0) {
@@ -150,6 +205,7 @@ public class MenuPrincipal {
             }
         }
     }
+
 
     private void submenuProfissionais() {
         int opcao = -1;
@@ -241,20 +297,43 @@ private void formularioPaciente() {
             }
         } while (!CpfValidator.isCpfValido(cpf));
 
-        System.out.print("Telefone: ");
-        String telefone = scanner.nextLine();
+       System.out.print("Telefone: ");
+String telefone = scanner.nextLine();
+
+LocalDate dataDiag = null;
+
+while (dataDiag == null) {
+    try {
         System.out.print("Data do Diagnóstico (dd/mm/aaaa): ");
-        LocalDate dataDiag = LocalDate.parse(scanner.nextLine(), formatadorData);
-        System.out.print("Histórico Clínico: ");
-        String historico = scanner.nextLine();
-        System.out.print("Nível de Suporte (1, 2 ou 3): ");
-        String suporte = scanner.nextLine();
+        String dataTexto = scanner.nextLine();
 
-        Paciente novoPaciente = new Paciente(id, nome, cpf, telefone, dataDiag, historico, suporte, idEscolhido);
-        pacienteRepo.salvar(novoPaciente);
-        System.out.println("🎉 Paciente cadastrado com sucesso!");
+        dataDiag = LocalDate.parse(dataTexto, formatadorData);
+
+    } catch (java.time.format.DateTimeParseException e) {
+        System.out.println("❌ Data inválida! Digite uma data válida no formato dd/MM/aaaa.");
     }
+}
 
+System.out.print("Histórico Clínico: ");
+String historico = scanner.nextLine();
+
+System.out.print("Nível de Suporte (1, 2 ou 3): ");
+String suporte = scanner.nextLine();
+
+Paciente novoPaciente = new Paciente(
+    id,
+    nome,
+    cpf,
+    telefone,
+    dataDiag,
+    historico,
+    suporte,
+    idEscolhido
+);
+
+pacienteRepo.salvar(novoPaciente);
+System.out.println("🎉 Paciente cadastrado com sucesso!");
+}
     private void formularioResponsavel() {
         System.out.println("\n--- CADASTRO DE RESPONSÁVEL ---");
         System.out.print("ID: ");
@@ -383,83 +462,53 @@ private void formularioPaciente() {
     // ==========================================
 
     private void formularioAlterarEstadoSessao() {
-        System.out.println("\n--- ALTERAÇÃO DE ESTADO DA SESSÃO ---");
-        List<Sessao> sessoes = sessaoRepo.listarTodas();
-        if (sessoes.isEmpty()) { System.out.println("Nenhuma sessão no sistema."); return; }
+    System.out.println("\n--- ALTERAÇÃO DE ESTADO DA SESSÃO ---");
+    List<Sessao> sessoes = sessaoRepo.listarTodas();
+    if (sessoes.isEmpty()) { 
+        System.out.println("Nenhuma sessão no sistema."); 
+        return; 
+    }
 
-        System.out.print("Digite o ID da sessão que deseja alterar: ");
-        int id = Integer.parseInt(scanner.nextLine());
+    System.out.print("Digite o ID da sessão que deseja alterar: ");
+    int id = Integer.parseInt(scanner.nextLine());
 
-        Sessao alvo = null;
-        for (Sessao s : sessoes) { if (s.getId() == id) { alvo = s; break; } }
-        if (alvo == null) { System.out.println("Sessão não encontrada!"); return; }
+    Sessao alvo = null;
+    for (Sessao s : sessoes) { 
+        if (s.getId() == id) { 
+            alvo = s; 
+            break; 
+        } 
+    }
+    
+    if (alvo == null) { 
+        System.out.println("Sessão não encontrada!"); 
+        return; 
+    }
 
-        System.out.println("Estado atual da sessão: [" + alvo.getNomeEstado() + "]");
-        System.out.print("Digite o novo Estado (REALIZADA, EVOLUIDA, CANCELADA): ");
-        String novoEstado = scanner.nextLine();
+    System.out.println("Estado atual da sessão: [" + alvo.getNomeEstado() + "]");
+    System.out.println("O que deseja fazer?");
+    System.out.println("1. Avançar (Realizar Sessão)");
+    System.out.println("2. Cancelar Sessão");
+    System.out.print("Escolha: ");
+    String opcao = scanner.nextLine();
 
-        try {
-            // Invoca a lógica interna do modelo que valida as regras de transição de POO
-            alvo.avancarFluxo(); // Chama o padrão State para mudar o estado
-            sessaoRepo.salvarTodas(sessoes);
-            System.out.println("🎉 Sucesso! A sessão mudou de estado para: [" + alvo.getNomeEstado() + "]");
-        } catch (EstadoInvalidoException e) {
-            System.out.println("\n❌ REGRA DE NEGÓCIO BARRADA (Exceção Capturada):");
-            System.out.println(e.getMessage());
+    try {
+        if (opcao.equals("1")) {
+            alvo.avancarFluxo(); // Usa a regra do Padrão State
+        } else if (opcao.equals("2")) {
+            alvo.setEstado(new EstadoCancelada()); // Troca forçada para Cancelada
+        } else {
+            System.out.println("Opção inválida!");
+            return;
         }
+        
+        sessaoRepo.salvarTodas(sessoes);
+        System.out.println("🎉 Sucesso! Novo estado: [" + alvo.getNomeEstado() + "]");
+    } catch (EstadoInvalidoException e) {
+        System.out.println("\n❌ REGRA BARRADA (Exceção Capturada):");
+        System.out.println(e.getMessage());
     }
-
-    // ==========================================
-    // MÉTODOS DE EDIÇÃO E EXCLUSÃO DE PACIENTE
-    // ==========================================
-
-    private void formularioEditarPaciente() {
-        System.out.println("\n--- EDIÇÃO DE FICHA DE PACIENTE ---");
-        System.out.print("Digite o ID do paciente que deseja alterar: ");
-        int id = Integer.parseInt(scanner.nextLine());
-
-        List<Paciente> pacientes = pacienteRepo.listarTodos();
-        Paciente alvo = null;
-        for (Paciente p : pacientes) { if (p.getId() == id) { alvo = p; break; } }
-        if (alvo == null) { System.out.println("⚠️ Paciente não encontrado."); return; }
-
-        System.out.print("Nome atual [" + alvo.getNome() + "]: ");
-        String nome = scanner.nextLine(); if(nome.isEmpty()) nome = alvo.getNome();
-
-        System.out.print("CPF atual [" + alvo.getCpf() + "]: ");
-        String cpf = scanner.nextLine(); if(cpf.isEmpty()) cpf = alvo.getCpf();
-
-        System.out.print("Telefone atual [" + alvo.getTelefone() + "]: ");
-        String telefone = scanner.nextLine(); if(telefone.isEmpty()) telefone = alvo.getTelefone();
-
-        System.out.print("Data Diagnóstico [" + alvo.getDataDiagnosticoTEA().format(formatadorData) + "]: ");
-        String dataStr = scanner.nextLine();
-        LocalDate dataDiag = dataStr.isEmpty() ? alvo.getDataDiagnosticoTEA() : LocalDate.parse(dataStr, formatadorData);
-
-        System.out.print("Histórico Clínico [" + alvo.getHistoricoClinico() + "]: ");
-        String historico = scanner.nextLine(); if(historico.isEmpty()) historico = alvo.getHistoricoClinico();
-
-        System.out.print("Suporte [" + alvo.getNecessidadeSuporte() + "]: ");
-        String suporte = scanner.nextLine(); if(suporte.isEmpty()) suporte = alvo.getNecessidadeSuporte();
-
-        List<Responsavel> responsaveis = responsavelRepo.listarTodos();
-        System.out.println("\n--- Responsáveis Disponíveis ---");
-        for (Responsavel r : responsaveis) { System.out.println("ID: " + r.getId() + " | Nome: " + r.getNome()); }
-
-        System.out.print("ID do Responsável (" + alvo.getIdResponsavel() + "): ");
-        String idRespStr = scanner.nextLine();
-        int idEscolhido = idRespStr.isEmpty() ? alvo.getIdResponsavel() : Integer.parseInt(idRespStr);
-
-        Paciente updated = new Paciente(id, nome, cpf, telefone, dataDiag, historico, suporte, idEscolhido);
-        if (pacienteRepo.atualizar(updated)) System.out.println("✅ Ficha médica do paciente alterada!");
-    }
-
-    private void formularioDeletarPaciente() {
-        System.out.print("\nDigite o ID do paciente para remover: ");
-        int id = Integer.parseInt(scanner.nextLine());
-        if (pacienteRepo.deletarPorId(id)) System.out.println("🗑️ Ficha excluída do arquivo!");
-        else System.out.println("⚠️ ID não encontrado.");
-    }
+}
 
     // ==========================================
     // MÉTODOS DE EDIÇÃO E EXCLUSÃO DE RESPONSÁVEL

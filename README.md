@@ -1,35 +1,59 @@
-# 🏥 EvoluTEA - Sistema de Gestão de Clínica TEA
+Markdown
+# 🏥 EvoluTEA - Sistema de Gestão Terapêutica (TEA)
 
-## 📖 Visão Geral
-O **EvoluTEA** é um sistema de software desenvolvido para otimizar o fluxo de atendimento em clínicas de terapia voltadas ao tratamento do Transtorno do Espectro Autista (TEA). O sistema foca em garantir a rastreabilidade clínica através de uma máquina de estados robusta e gestão de dados orientada a objetos.
+[![Java](https://img.shields.io/badge/Java-11+-orange.svg)](https://www.oracle.com/java/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
+## 📋 Visão Geral
+O **EvoluTEA** é uma solução de software robusta, desenvolvida para gerir o ciclo de vida de atendimentos clínicos especializados em TEA. A arquitetura prioriza a **rastreabilidade clínica** e a **segurança de transações**, utilizando padrões de projeto avançados para garantir escalabilidade e manutenção simplificada.
 
 ## 🏛️ Modelagem do Sistema
-O projeto foi modelado seguindo os princípios de POO (SOLID), garantindo baixo acoplamento e alta coesão.
+O projeto foi modelado seguindo os princípios **SOLID**, com foco no desacoplamento entre a camada de persistência (`Repository Pattern`) e a lógica de negócio (`State Pattern`).
 
-### Diagrama de Classes
-*(Aqui, se você tiver o diagrama, coloque a imagem no repositório, por exemplo, em uma pasta `/docs/diagrama.png` e use a tag abaixo)*
-![Diagrama de Classes do EvoluTEA](./docs/diagrama.png)
+### Diagrama de Classes (UML)
+O diagrama abaixo detalha a estrutura de classes, o gerenciamento de estados das sessões e as dependências de persistência do sistema:
 
-*O diagrama acima ilustra as relações entre as entidades `Paciente`, `Responsavel`, `Profissional` e `Sessao`, destacando a implementação da interface `CalculadorHonorario` que viabiliza o polimorfismo no repasse financeiro.*
+![Diagrama de Classes](./docs/diagrama%20EvoluTEA.png)
 
 ## ⚙️ Arquitetura e Regras de Negócio
-1. **Máquina de Estados:** As transições de `Sessao` são protegidas por lógica de negócio na classe `Sessao.java`. Tentar transições inválidas dispara uma exceção personalizada (`EstadoInvalidoException`).
-2. **Polimorfismo:** O cálculo de honorários é tratado polimorficamente via interface `CalculadorHonorario`, permitindo adicionar novas regras de remuneração (Ex: planos de saúde distintos) sem alterar a estrutura principal.
-3. **Persistência:** Utilização de File I/O para persistência de dados em formato CSV (`sessoes.txt`, etc.).
+1. **Máquina de Estados (State Pattern):** As transições de `Sessao` (Agendada, Realizada, Cancelada) são protegidas por lógica de negócio encapsulada. Tentativas de transições inválidas disparam a exceção personalizada `EstadoInvalidoException`.
+2. **Polimorfismo:** O cálculo de honorários é tratado via interface `CalculadorHonorario`, permitindo a extensibilidade de regras de remuneração sem alterar o núcleo do sistema.
+3. **Persistência:** Utilização de persistência em arquivos (`Flat File Database`), garantindo a integridade dos dados entre execuções.
+4. **Validação:** Implementação de `CpfValidator` para assegurar a conformidade dos dados de entrada na origem.
 
 ## 🛠️ Tecnologias Utilizadas
 * **Linguagem:** Java (JDK 11+)
 * **Paradigma:** Orientação a Objetos (POO)
+* **Design Patterns:** State, Repository, Factory.
+* **Automação:** Makefile
 * **Controle de Versão:** Git/GitHub
 
-## 🚀 Como Executar
-1. **Clonar:** `git clone https://github.com/TalissonOliveira14/EvoluTEA.git`
-2. **Compilar:** `javac -d bin src/Main.java src/exception/*.java src/view/MenuPrincipal.java src/model/*.java src/repository/*.java`
-3. **Executar:** `java -cp bin src.Main`
+## 🚀 Guia de Execução
+Este projeto utiliza um `Makefile` para automatizar o ciclo de build. Certifique-se de ter o `make` instalado em seu sistema Linux.
 
-## 👥 Integrantes
-* Talisson Oliveira
-* Allson Lobato
+1. **Clonar o repositório:**
+```bash
+   git clone [https://github.com/TalissonOliveira14/EvoluTEA.git](https://github.com/TalissonOliveira14/EvoluTEA.git)
+   cd EvoluTEA
+Compilar o projeto:
+
+Bash
+   make compile
+Executar o sistema:
+
+Bash
+   make run
+Limpeza (Clean):
+Para remover os arquivos compilados (.class):
+
+Bash
+   make clean
+👥 Integrantes
+Talisson Oliveira
+
+Allson Lobato
+
+Projeto desenvolvido para a Atividade da Unidade 03 - Professor Jefferson Gomes Dutra.
+
 
 ---
-*Projeto desenvolvido para a Atividade da Unidade 03 - Professor Jefferson Gomes Dutra.*
