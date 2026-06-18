@@ -17,7 +17,7 @@ public class RelatorioService {
         }
 
         Map<String, Long> contagem = pacientes.stream()
-                .collect(Collectors.groupingBy(Paciente::getNecessidadeSuporte, Collectors.counting()));
+                .collect(Collectors.groupingBy(p -> p.isTemLaudo() ? "Com Laudo" : "Investigação", Collectors.counting()));
         
         contagem.forEach((nivel, total) -> 
             System.out.println("Nível " + nivel + ": " + total + " paciente(s)"));

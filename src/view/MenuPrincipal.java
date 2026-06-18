@@ -2,6 +2,7 @@ package src.view;
 
 import src.service.RelatorioService;
 import java.util.Scanner;
+import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -111,7 +112,8 @@ public class MenuPrincipal {
             telefone, 
             alvo.getDataDiagnosticoTEA(), 
             alvo.getHistoricoClinico(), 
-            alvo.getNecessidadeSuporte(), 
+            alvo.isTemLaudo(), 
+            alvo.getDificuldades(), 
             alvo.getIdResponsavel()
         );
 
@@ -215,6 +217,7 @@ public class MenuPrincipal {
             System.out.println("2. Listar Todos os Profissionais");
             System.out.println("3. Editar Ficha de Profissional");
             System.out.println("4. Deletar Ficha de Profissional");
+            System.out.println("5. Ver pacientes direcionados");
             System.out.println("0. Voltar ao Menu Principal");
             System.out.print("Escolha uma opção: ");
 
@@ -225,6 +228,7 @@ public class MenuPrincipal {
                     case 2: listarProfissionais(); break;
                     case 3: formularioEditarProfissional(); break;
                     case 4: formularioDeletarProfissional(); break;
+                    case 5: listarPacientesPorProfissional(); break;
                     case 0: break;
                     default: System.out.println("Opção inválida!");
                 }
@@ -233,6 +237,34 @@ public class MenuPrincipal {
             }
         }
     }
+
+    private void listarPacientesPorProfissional() {
+    System.out.print("Digite o ID do Profissional: ");
+    int id = Integer.parseInt(scanner.nextLine());
+    
+    // Busca o objeto profissional pelo ID
+    Profissional prof = null;
+    for (Profissional p : profesionalRepo.listarTodos()) {
+        if (p.getId() == id) {
+            prof = p;
+            break;
+        }
+    }
+
+    if (prof != null) {
+        List<Paciente> pacientes = pacienteRepo.buscarPacientesPorEspecialidade(prof.getEspecialidade());
+        System.out.println("\n--- PACIENTES DIRECIONADOS PARA: " + prof.getNome() + " ---");
+        if (pacientes.isEmpty()) {
+            System.out.println("Nenhum paciente com necessidade compatível.");
+        } else {
+            for (Paciente p : pacientes) {
+                System.out.println("-> " + p.getNome() + " (Dificuldade: " + p.getDificuldades() + ")");
+            }
+        }
+    } else {
+        System.out.println("❌ Profissional não encontrado!");
+    }
+}
 
     private void submenuSessoes() {
         int opcao = -1;
@@ -266,7 +298,7 @@ public class MenuPrincipal {
 private void formularioPaciente() {
         System.out.println("\n--- CADASTRO DE PACIENTE ---");
 
-        // 1. Definição do Responsável
+        // 1. Definição do Responsável (Mantido)
         System.out.print("O paciente possui um representante legal cadastrado? (S/N): ");
         String possuiResponsavel = scanner.nextLine();
         
@@ -281,13 +313,12 @@ private void formularioPaciente() {
             idEscolhido = Integer.parseInt(scanner.nextLine());
         }
 
-        // 2. Coleta dos dados
+        // 2. Coleta dos dados básicos (Mantido)
         System.out.print("ID do Paciente: ");
         int id = Integer.parseInt(scanner.nextLine());
         System.out.print("Nome: ");
         String nome = scanner.nextLine();
         
-        // Loop de validação: ele não deixa passar enquanto o CPF for inválido
         String cpf;
         do {
             System.out.print("CPF: ");
@@ -297,43 +328,79 @@ private void formularioPaciente() {
             }
         } while (!CpfValidator.isCpfValido(cpf));
 
-       System.out.print("Telefone: ");
-String telefone = scanner.nextLine();
+        System.out.print("Telefone: ");
+        String telefone = scanner.nextLine();
 
-LocalDate dataDiag = null;
+        LocalDate dataDiag = null;
+        while (dataDiag == null) {
+            try {
+                System.out.print("Data do Diagnóstico (dd/mm/aaaa): ");
+                String dataTexto = scanner.nextLine();
+                dataDiag = LocalDate.parse(dataTexto, formatadorData);
+            } catch (java.time.format.DateTimeParseException e) {
+                System.out.println("❌ Data inválida! Digite uma data válida no formato dd/MM/aaaa.");
+            }
+        }
 
-while (dataDiag == null) {
-    try {
-        System.out.print("Data do Diagnóstico (dd/mm/aaaa): ");
-        String dataTexto = scanner.nextLine();
+        System.out.print("Histórico Clínico: ");
+        String historico = scanner.nextLine();
 
-        dataDiag = LocalDate.parse(dataTexto, formatadorData);
+        // 3. NOVA LÓGICA DE TRIAGEM (Aplicada)
+        System.out.print("O paciente possui laudo médico para TEA? (S/N): ");
+        boolean temLaudo = scanner.nextLine().equalsIgnoreCase("S");
 
-    } catch (java.time.format.DateTimeParseException e) {
-        System.out.println("❌ Data inválida! Digite uma data válida no formato dd/MM/aaaa.");
+        System.out.println("--- SELECIONE AS DIFICULDADES (Digite 0 para finalizar) ---");
+        System.out.println("1. Fala\n2. Motor\n3. Comportamento\n4. Socialização");
+
+        List<String> listaDificuldades = new ArrayList<>();
+        int opcaoDificuldade = -1;
+        while (opcaoDificuldade != 0) {
+            System.out.print("Escolha uma opção (ou 0 para salvar): ");
+            try {
+                opcaoDificuldade = Integer.parseInt(scanner.nextLine());
+                switch (opcaoDificuldade) {
+                    case 1: listaDificuldades.add("Fala"); break;
+                    case 2: listaDificuldades.add("Motor"); break;
+                    case 3: listaDificuldades.add("Comportamento"); break;
+                    case 4: listaDificuldades.add("Socialização"); break;
+                    case 0: break;
+                    default: System.out.println("Opção inválida.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Digite um número válido.");
+            }
+        }
+
+        // 4. Instanciação com o novo construtor
+        Paciente novoPaciente = new Paciente(
+            id,
+            nome,
+            cpf,
+            telefone,
+            dataDiag,
+            historico,
+            temLaudo,           // Campo novo
+            listaDificuldades,  // Campo novo
+            idEscolhido
+        );
+
+        // 5. Salvar (Agora com a regra atualizada)
+        pacienteRepo.salvar(novoPaciente);
+        System.out.println("🎉 Paciente cadastrado com sucesso!");
+
+        System.out.println("\n--- ENCAMINHAMENTO SUGERIDO ---");
+        for (String diff : listaDificuldades) {
+            List<Profissional> sugestoes = profesionalRepo.buscarPorDificuldade(diff);
+            if (!sugestoes.isEmpty()) {
+                System.out.println("Para a dificuldade [" + diff + "], sugerimos: ");
+                for (Profissional prof : sugestoes) {
+                    System.out.println(" -> " + prof.getNome() + " (" + prof.getEspecialidade() + ")");
+                }
+            } else {
+                System.out.println("Nenhum especialista cadastrado para: [" + diff + "]");
+            }
+        }
     }
-}
-
-System.out.print("Histórico Clínico: ");
-String historico = scanner.nextLine();
-
-System.out.print("Nível de Suporte (1, 2 ou 3): ");
-String suporte = scanner.nextLine();
-
-Paciente novoPaciente = new Paciente(
-    id,
-    nome,
-    cpf,
-    telefone,
-    dataDiag,
-    historico,
-    suporte,
-    idEscolhido
-);
-
-pacienteRepo.salvar(novoPaciente);
-System.out.println("🎉 Paciente cadastrado com sucesso!");
-}
     private void formularioResponsavel() {
         System.out.println("\n--- CADASTRO DE RESPONSÁVEL ---");
         System.out.print("ID: ");
@@ -363,33 +430,49 @@ System.out.println("🎉 Paciente cadastrado com sucesso!");
     }
 
     private void formularioProfissional() {
-        System.out.println("\n--- CADASTRO DE PROFISSIONAL ---");
-        System.out.print("ID: ");
-        int id = Integer.parseInt(scanner.nextLine());
-        System.out.print("Nome: ");
-        String nome = scanner.nextLine();
-        
-        String cpf;
-        do {
-            System.out.print("CPF: ");
-            cpf = scanner.nextLine();
-            if (!CpfValidator.isCpfValido(cpf)) {
-                System.out.println("❌ ERRO: CPF inválido. Por favor, digite novamente.");
-            }
-        } while (!CpfValidator.isCpfValido(cpf));
+    System.out.println("\n--- CADASTRO DE PROFISSIONAL ---");
+    System.out.print("ID: ");
+    int id = Integer.parseInt(scanner.nextLine());
+    System.out.print("Nome: ");
+    String nome = scanner.nextLine();
+    
+    String cpf;
+    do {
+        System.out.print("CPF: ");
+        cpf = scanner.nextLine();
+        if (!CpfValidator.isCpfValido(cpf)) {
+            System.out.println("❌ ERRO: CPF inválido. Por favor, digite novamente.");
+        }
+    } while (!CpfValidator.isCpfValido(cpf));
 
-        System.out.print("Telefone: ");
-        String telefone = scanner.nextLine();
-        System.out.print("Registro Profissional (CRP/CRM): ");
-        String registro = scanner.nextLine();
-        System.out.print("Especialidade: ");
-        String especialidade = scanner.nextLine();
+    System.out.print("Telefone: ");
+    String telefone = scanner.nextLine();
+    System.out.print("Registro Profissional (CRP/CRM): ");
+    String registro = scanner.nextLine();
 
-        Profissional novoProf = new Profissional(id, nome, cpf, telefone, registro, especialidade);
-        profesionalRepo.salvar(novoProf);
-        System.out.println("🎉 Profissional cadastrado com sucesso!");
+    // --- BLOCO NOVO E CORRIGIDO ---
+    System.out.println("Selecione a Especialidade:");
+    System.out.println("1. Fonoaudiólogo");
+    System.out.println("2. Psicólogo");
+    System.out.println("3. Terapeuta Ocupacional");
+    System.out.println("4. Pedagogo");
+    System.out.print("Opção: ");
+    int op = Integer.parseInt(scanner.nextLine());
+    
+    String especialidade;
+    switch (op) {
+        case 1: especialidade = "Fonoaudiólogo"; break;
+        case 2: especialidade = "Psicólogo"; break;
+        case 3: especialidade = "Terapeuta Ocupacional"; break;
+        case 4: especialidade = "Pedagogo"; break;
+        default: especialidade = "Outros";
     }
+    // ------------------------------
 
+    Profissional novoProf = new Profissional(id, nome, cpf, telefone, registro, especialidade);
+    profesionalRepo.salvar(novoProf);
+    System.out.println("🎉 Profissional cadastrado com sucesso!");
+}
     private void formularioSessao() {
         try {
             System.out.println("\n--- AGENDAMENTO DE SESSÃO ---");
@@ -423,7 +506,8 @@ System.out.println("🎉 Paciente cadastrado com sucesso!");
         List<Paciente> pacientes = pacienteRepo.listarTodos();
         if (pacientes.isEmpty()) { System.out.println("Nenhum paciente encontrado."); return; }
         for (Paciente p : pacientes) {
-            System.out.println("ID: " + p.getId() + " | Nome: " + p.getNome() + " | Suporte: Nível " + p.getNecessidadeSuporte());
+           String status = p.isTemLaudo() ? "Com Laudo" : "Investigação";
+           System.out.println("ID: " + p.getId() + " | Nome: " + p.getNome() + " | Status: " + status + " | Dificuldades: " + p.getDificuldades());
         }
     }
 

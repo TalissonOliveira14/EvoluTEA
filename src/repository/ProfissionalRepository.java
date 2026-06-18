@@ -50,6 +50,21 @@ public class ProfissionalRepository {
         return lista;
     }
 
+    public List<Profissional> buscarPorDificuldade(String dificuldadePaciente) {
+        List<Profissional> encontrados = new ArrayList<>();
+        // Correção: Carregamos a lista toda primeiro
+        List<Profissional> todosOsProfissionais = listarTodos(); 
+        
+        // Agora iteramos sobre a lista que acabamos de carregar
+        for (Profissional p : todosOsProfissionais) {
+            if (src.util.RegrasClinicas.getDificuldadePelaEspecialidade(p.getEspecialidade())
+                .equalsIgnoreCase(dificuldadePaciente)) {
+                encontrados.add(p);
+            }
+        }
+        return encontrados;
+    }
+
     // ✨ NOVO MÉTODO: Atualiza os dados de um profissional existente
     public boolean atualizar(Profissional profissionalAtualizado) {
         List<Profissional> profissionais = listarTodos();
