@@ -5,7 +5,6 @@ import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import src.model.Paciente;
 import src.model.Responsavel;
 import src.model.Profissional;
@@ -17,10 +16,10 @@ import src.repository.ProfissionalRepository;
 import src.repository.SessaoRepository;
 import src.exception.EstadoInvalidoException;
 import src.util.CpfValidator;
+import src.util.DateUtils;
 
 public class MenuPrincipal {
     private Scanner scanner;
-    private DateTimeFormatter formatadorData;
     private PacienteRepository pacienteRepo;
     private ResponsavelRepository responsavelRepo;
     private ProfissionalRepository profesionalRepo;
@@ -28,7 +27,6 @@ public class MenuPrincipal {
 
     public MenuPrincipal() {
         this.scanner = new Scanner(System.in);
-        this.formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         this.pacienteRepo = new PacienteRepository();
         this.responsavelRepo = new ResponsavelRepository();
         this.profesionalRepo = new ProfissionalRepository();
@@ -331,16 +329,7 @@ private void formularioPaciente() {
         System.out.print("Telefone: ");
         String telefone = scanner.nextLine();
 
-        LocalDate dataDiag = null;
-        while (dataDiag == null) {
-            try {
-                System.out.print("Data do Diagnóstico (dd/mm/aaaa): ");
-                String dataTexto = scanner.nextLine();
-                dataDiag = LocalDate.parse(dataTexto, formatadorData);
-            } catch (java.time.format.DateTimeParseException e) {
-                System.out.println("❌ Data inválida! Digite uma data válida no formato dd/MM/aaaa.");
-            }
-        }
+        LocalDate dataDiag = DateUtils.lerData(scanner, "Data do Diagnóstico");
 
         System.out.print("Histórico Clínico: ");
         String historico = scanner.nextLine();

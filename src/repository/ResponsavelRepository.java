@@ -45,12 +45,12 @@ public class ResponsavelRepository {
                 lista.add(r);
             }
         } catch (IOException e) {
-            // Retorna lista vazia se não houver arquivo
+            
         }
         return lista;
     }
 
-    // ✨ NOVO MÉTODO: Atualiza os dados de um responsável existente
+    
     public boolean atualizar(Responsavel responsavelAtualizado) {
         List<Responsavel> responsaveis = listarTodos();
         boolean modificado = false;

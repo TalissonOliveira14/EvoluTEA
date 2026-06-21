@@ -2,31 +2,29 @@ package src.repository;
 
 import java.io.*;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import src.model.Paciente;
+import src.util.DateUtils;
 
 public class PacienteRepository {
     private static final String FILE_PATH = "pacientes.txt";
-    private DateTimeFormatter formatadorData;
-
-    public PacienteRepository() {
-        this.formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    }
 
     private String converterDificuldadesParaString(List<String> dificuldades) {
         return String.join(",", dificuldades);
     }
 
     public void salvar(Paciente paciente) {
+        
+        src.util.CpfValidator.validar(paciente.getCpf());
+
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_PATH, true))) {
             String linha = paciente.getId() + ";" +
                            paciente.getNome() + ";" +
                            paciente.getCpf() + ";" +
                            paciente.getTelefone() + ";" +
-                           paciente.getDataDiagnosticoTEA().format(formatadorData) + ";" +
+                          DateUtils.formatar(paciente.getDataDiagnosticoTEA()) + ";" +
                            paciente.getHistoricoClinico() + ";" +
                            paciente.isTemLaudo() + ";" +
                            converterDificuldadesParaString(paciente.getDificuldades()) + ";" +
@@ -52,7 +50,7 @@ public class PacienteRepository {
                 String nome = dados[1];
                 String cpf = dados[2];
                 String telefone = dados[3];
-                LocalDate dataDiag = LocalDate.parse(dados[4], formatadorData);
+                LocalDate dataDiag = DateUtils.parse(dados[4]);
                 String historico = dados[5];
                 boolean temLaudo = Boolean.parseBoolean(dados[6]);
                 List<String> dificuldades = Arrays.asList(dados[7].split(","));
@@ -85,7 +83,7 @@ public class PacienteRepository {
                                paciente.getNome() + ";" +
                                paciente.getCpf() + ";" +
                                paciente.getTelefone() + ";" +
-                               paciente.getDataDiagnosticoTEA().format(formatadorData) + ";" +
+                               DateUtils.formatar(paciente.getDataDiagnosticoTEA()) + ";" +
                                paciente.getHistoricoClinico() + ";" +
                                paciente.isTemLaudo() + ";" +
                                converterDificuldadesParaString(paciente.getDificuldades()) + ";" +

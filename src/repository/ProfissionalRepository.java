@@ -55,7 +55,7 @@ public class ProfissionalRepository {
         // Correção: Carregamos a lista toda primeiro
         List<Profissional> todosOsProfissionais = listarTodos(); 
         
-        // Agora iteramos sobre a lista que acabamos de carregar
+        
         for (Profissional p : todosOsProfissionais) {
             if (src.util.RegrasClinicas.getDificuldadePelaEspecialidade(p.getEspecialidade())
                 .equalsIgnoreCase(dificuldadePaciente)) {
