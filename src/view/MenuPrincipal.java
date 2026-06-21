@@ -92,7 +92,7 @@ public class MenuPrincipal {
             return;
         }
 
-        // Solicitação dos dados para atualização
+        
         System.out.println("Editando paciente: " + alvo.getNome());
         System.out.print("Novo Nome (ou vazio para manter): ");
         String novoNome = scanner.nextLine();
@@ -102,7 +102,7 @@ public class MenuPrincipal {
         String novoTelefone = scanner.nextLine();
         String telefone = novoTelefone.isEmpty() ? alvo.getTelefone() : novoTelefone;
 
-        // Atualiza o objeto com os novos dados
+        
         Paciente pacienteAtualizado = new Paciente(
             alvo.getId(), 
             nome, 
@@ -290,13 +290,13 @@ public class MenuPrincipal {
     }
 
     
-    // MÉTODOS DE CADASTRO COM TRATAMENTO DE EXCEÇÃO CUSTOMIZADO
+    
     
 
 private void formularioPaciente() {
         System.out.println("\n--- CADASTRO DE PACIENTE ---");
 
-        // 1. Definição do Responsável (Mantido)
+        
         System.out.print("O paciente possui um representante legal cadastrado? (S/N): ");
         String possuiResponsavel = scanner.nextLine();
         
@@ -311,7 +311,7 @@ private void formularioPaciente() {
             idEscolhido = Integer.parseInt(scanner.nextLine());
         }
 
-        // 2. Coleta dos dados básicos (Mantido)
+        
         System.out.print("ID do Paciente: ");
         int id = Integer.parseInt(scanner.nextLine());
         System.out.print("Nome: ");
@@ -334,7 +334,7 @@ private void formularioPaciente() {
         System.out.print("Histórico Clínico: ");
         String historico = scanner.nextLine();
 
-        // 3. NOVA LÓGICA DE TRIAGEM (Aplicada)
+        
         System.out.print("O paciente possui laudo médico para TEA? (S/N): ");
         boolean temLaudo = scanner.nextLine().equalsIgnoreCase("S");
 
@@ -360,7 +360,7 @@ private void formularioPaciente() {
             }
         }
 
-        // 4. Instanciação com o novo construtor
+        
         Paciente novoPaciente = new Paciente(
             id,
             nome,
@@ -368,12 +368,12 @@ private void formularioPaciente() {
             telefone,
             dataDiag,
             historico,
-            temLaudo,           // Campo novo
-            listaDificuldades,  // Campo novo
+            temLaudo,          
+            listaDificuldades,  
             idEscolhido
         );
 
-        // 5. Salvar (Agora com a regra atualizada)
+        
         pacienteRepo.salvar(novoPaciente);
         System.out.println("🎉 Paciente cadastrado com sucesso!");
 
@@ -487,7 +487,7 @@ private void formularioPaciente() {
     }
 
     
-    // MÉTODOS DE EXIBIÇÃO / LISTAGEM
+    
     
 
     private void listarPacientes() {
@@ -531,7 +531,7 @@ private void formularioPaciente() {
     }
 
     
-    // TRANSIÇÃO DE ESTADOS DA MÁQUINA DE ESTADOS
+    
     
 
     private void formularioAlterarEstadoSessao() {
@@ -584,7 +584,7 @@ private void formularioPaciente() {
 }
 
     
-    // MÉTODOS DE EDIÇÃO E EXCLUSÃO DE RESPONSÁVEL
+
     
 
     private void formularioEditarResponsavel() {
@@ -634,7 +634,7 @@ private void formularioPaciente() {
     }
 
     
-    // MÉTODOS DE EDIÇÃO E EXCLUSÃO DE PROFISSIONAL
+
 
     private void formularioEditarProfissional() {
         System.out.println("\n--- EDIÇÃO DE FICHA DE PROFISSIONAL ---");

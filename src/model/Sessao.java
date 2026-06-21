@@ -1,7 +1,7 @@
 package src.model;
 
 import src.model.estados.*;
-import src.exception.EstadoInvalidoException; // Import necessário!
+import src.exception.EstadoInvalidoException; 
 
 public class Sessao {
     private int id;

@@ -23,7 +23,7 @@ public class RelatorioService {
             System.out.println("Nível " + nivel + ": " + total + " paciente(s)"));
     }
 
-    // Relatório usando Stream API para somar valores de sessões realizadas
+    
     public static void exibirFaturamentoSessoes(List<Sessao> sessoes) {
         System.out.println("\n--- RELATÓRIO: FATURAMENTO DE SESSÕES ---");
         double total = sessoes.stream()

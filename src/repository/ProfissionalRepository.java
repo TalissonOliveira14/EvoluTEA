@@ -45,14 +45,14 @@ public class ProfissionalRepository {
                 lista.add(p);
             }
         } catch (IOException e) {
-            // Retorna lista vazia se não houver arquivo
+            
         }
         return lista;
     }
 
     public List<Profissional> buscarPorDificuldade(String dificuldadePaciente) {
         List<Profissional> encontrados = new ArrayList<>();
-        // Correção: Carregamos a lista toda primeiro
+        
         List<Profissional> todosOsProfissionais = listarTodos(); 
         
         
