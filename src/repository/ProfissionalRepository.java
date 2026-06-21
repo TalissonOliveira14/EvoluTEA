@@ -65,7 +65,7 @@ public class ProfissionalRepository {
         return encontrados;
     }
 
-    // ✨ NOVO MÉTODO: Atualiza os dados de um profissional existente
+
     public boolean atualizar(Profissional profissionalAtualizado) {
         List<Profissional> profissionais = listarTodos();
         boolean modificado = false;

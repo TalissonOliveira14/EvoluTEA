@@ -6,8 +6,7 @@ import src.exception.EstadoInvalidoException; // Certifique-se de importar sua e
 public class EstadoRealizada implements EstadoSessao {
     @Override
     public void proximo(Sessao sessao) throws EstadoInvalidoException {
-        // Em vez de printar, lançamos a exceção. 
-        // O MenuPrincipal vai capturar isso com um try-catch.
+        
         throw new EstadoInvalidoException("Erro: A sessão já está REALIZADA e não pode ser alterada.");
     }
 

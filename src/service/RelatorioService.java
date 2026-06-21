@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 public class RelatorioService {
 
-    // Relatório usando Stream API para agrupar pacientes por nível de suporte
+    
     public static void exibirPacientesPorNivel(List<Paciente> pacientes) {
         System.out.println("\n--- RELATÓRIO: PACIENTES POR NÍVEL DE SUPORTE ---");
         if (pacientes.isEmpty()) {

@@ -1,7 +1,7 @@
 package src.repository;
 
 import src.model.Sessao;
-import src.model.estados.*; // Certifique-se de importar seus estados
+import src.model.estados.*; 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +45,7 @@ public class SessaoRepository {
 
                 Sessao s = new Sessao(id, idPac, idProf, data, valor, tipo);
                 
-                // Reconstrói o estado correto
+                
                 if (nomeEstado.equals("AGENDADA")) s.setEstado(new EstadoAgendada());
                 else if (nomeEstado.equals("REALIZADA")) s.setEstado(new EstadoRealizada());
                 else if (nomeEstado.equals("CANCELADA")) s.setEstado(new EstadoCancelada());

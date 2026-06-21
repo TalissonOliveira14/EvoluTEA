@@ -18,12 +18,12 @@ public class Paciente extends Pessoa {
         this.dataDiagnosticoTEA = dataDiagnosticoTEA;
         this.historicoClinico = historicoClinico;
         this.temLaudo = temLaudo;
-        // Garante que a lista nunca seja nula, evitando erros
+        // 2
         this.dificuldades = (dificuldades != null) ? dificuldades : new ArrayList<>();
         this.idResponsavel = idResponsavel;
     }
 
-    // Métodos de regra de negócio
+    // Tratamento aonde se plica a uma triagem
     public String getStatusTriagem() {
         return temLaudo ? "Tratamento (Com Laudo)" : "Investigação (Sem Laudo)";
     }

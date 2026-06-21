@@ -24,7 +24,7 @@ public class Sessao {
 
     public void setEstado(EstadoSessao estado) { this.estado = estado; }
     
-    // CORRIGIDO: Adicionado o 'throws' para permitir que a exceção suba para o Menu
+    
     public void avancarFluxo() throws EstadoInvalidoException {
         this.estado.proximo(this); 
     }

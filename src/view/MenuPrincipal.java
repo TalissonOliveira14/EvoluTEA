@@ -291,9 +291,9 @@ public class MenuPrincipal {
         }
     }
 
-    // ==========================================
+    
     // MÉTODOS DE CADASTRO COM TRATAMENTO DE EXCEÇÃO CUSTOMIZADO
-    // ==========================================
+    
 
 private void formularioPaciente() {
         System.out.println("\n--- CADASTRO DE PACIENTE ---");
@@ -450,7 +450,7 @@ private void formularioPaciente() {
     System.out.print("Registro Profissional (CRP/CRM): ");
     String registro = scanner.nextLine();
 
-    // --- BLOCO NOVO E CORRIGIDO ---
+    
     System.out.println("Selecione a Especialidade:");
     System.out.println("1. Fonoaudiólogo");
     System.out.println("2. Psicólogo");
@@ -467,7 +467,7 @@ private void formularioPaciente() {
         case 4: especialidade = "Pedagogo"; break;
         default: especialidade = "Outros";
     }
-    // ------------------------------
+    
 
     Profissional novoProf = new Profissional(id, nome, cpf, telefone, registro, especialidade);
     profesionalRepo.salvar(novoProf);
@@ -497,9 +497,9 @@ private void formularioPaciente() {
         }
     }
 
-    // ==========================================
+    
     // MÉTODOS DE EXIBIÇÃO / LISTAGEM
-    // ==========================================
+    
 
     private void listarPacientes() {
         System.out.println("\n=== LISTA DE PACIENTES CADASTRADOS ===");
@@ -541,9 +541,9 @@ private void formularioPaciente() {
         }
     }
 
-    // ==========================================
+    
     // TRANSIÇÃO DE ESTADOS DA MÁQUINA DE ESTADOS
-    // ==========================================
+    
 
     private void formularioAlterarEstadoSessao() {
     System.out.println("\n--- ALTERAÇÃO DE ESTADO DA SESSÃO ---");
@@ -594,9 +594,9 @@ private void formularioPaciente() {
     }
 }
 
-    // ==========================================
+    
     // MÉTODOS DE EDIÇÃO E EXCLUSÃO DE RESPONSÁVEL
-    // ==========================================
+    
 
     private void formularioEditarResponsavel() {
         System.out.println("\n--- EDIÇÃO DE FICHA DE RESPONSÁVEL ---");
@@ -644,9 +644,8 @@ private void formularioPaciente() {
         else System.out.println("⚠️ ID não encontrado.");
     }
 
-    // ==========================================
+    
     // MÉTODOS DE EDIÇÃO E EXCLUSÃO DE PROFISSIONAL
-    // ==========================================
 
     private void formularioEditarProfissional() {
         System.out.println("\n--- EDIÇÃO DE FICHA DE PROFISSIONAL ---");

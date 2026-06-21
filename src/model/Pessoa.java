@@ -1,13 +1,13 @@
 package src.model;
 
-// A palavra 'abstract' garante que esta classe só sirva como molde para a herança
+// Início com os dados que as classes filhos vão herda da classe mãe "Pessoa"
 public abstract class Pessoa {
     private int id;
     private String nome;
     private String cpf;
     private String telefone;
 
-    // Construtor para inicializar os dados comuns a todos
+    // Construtor 
     public Pessoa(int id, String nome, String cpf, String telefone) {
         this.id = id;
         this.nome = nome;
@@ -15,7 +15,7 @@ public abstract class Pessoa {
         this.telefone = telefone;
     }
 
-    // Getters e Setters (Necessários para o encapsulamento dos dados)
+    // Getters e Setters 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
