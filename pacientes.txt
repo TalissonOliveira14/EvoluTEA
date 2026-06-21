@@ -1,2 +1,1 @@
-1;Thalyta;16850144456;84987439243;02/03/2023;vsdfdsfds;false;Fala,Motor,Comportamento,Socialização;0
-1;Thalyta Raquel ;16850144456;84987439243;23/03/2023;Thalyta etc etc;true;Fala,Motor,Comportamento,Socialização;0
+2;Rute Emanuella Tomaz de Oliveira;71022676490;84999815456;20/01/2025;Rute tem DI, onde tem o pensamento e tomada de decisões mais lentas, ansiedade generalizada e TDAH forte, onde precisa de terapias afim impacto na vida contidiana. ;true;Comportamento,Socialização;0

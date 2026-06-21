@@ -45,7 +45,7 @@ public class MenuPrincipal {
             System.out.println("1. Gerenciar Pacientes");
             System.out.println("2. Gerenciar Responsáveis");
             System.out.println("3. Gerenciar Profissionais");
-            System.out.println("4. Gerenciar Sessões e Evoluções (Máquina de Estados)");
+            System.out.println("4. Gerenciar Sessões e Evoluções");
             System.out.println("5. Relatórios Gerenciais");
             System.out.println("0. Sair");
             System.out.print("Escolha uma opção: ");
@@ -269,8 +269,8 @@ public class MenuPrincipal {
         while (opcao != 0) {
             System.out.println("\n--- MÓDULO: GESTÃO DE SESSÕES (ESTADO DINÂMICO) ---");
             System.out.println("1. Agendar Nova Sessão");
-            System.out.println("2. Listar Todas as Sessões (Repasse Polimórfico)");
-            System.out.println("3. Mudar Estado da Sessão (Regras de Transição)");
+            System.out.println("2. Listar Todas as Sessões");
+            System.out.println("3. Mudar Estado da Sessão");
             System.out.println("0. Voltar ao Menu Principal");
             System.out.print("Escolha uma opção: ");
 
@@ -519,16 +519,20 @@ private void formularioPaciente() {
     }
 
     private void listarSessoes() {
-        System.out.println("\n=== HISTÓRICO DE SESSÕES (APLICAÇÃO DE POLIMORFISMO) ===");
-        List<Sessao> sessoes = sessaoRepo.listarTodas();
-        if (sessoes.isEmpty()) { System.out.println("Nenhuma sessão registrada no histórico."); return; }
-        for (Sessao s : sessoes) {
-            System.out.println("ID: " + s.getId() + " | Paciente ID: " + s.getIdPaciente() + " | Data: " + s.getData() + " | Tipo: " + s.getTipoAtendimento());
-            System.out.println("🔄 Estado Atual: [" + s.getNomeEstado() + "]");
-            System.out.println("💰 Valor Base: R$ " + s.getValorBase() + " -> Repasse Líquido (Polimórfico): R$ " + s.getValorLiquidoProfissional());
-            System.out.println("----------------------------------------------------------------");
-        }
+    System.out.println("\n=== HISTÓRICO DE SESSÕES ===");
+    List<Sessao> sessoes = sessaoRepo.listarTodas();
+    if (sessoes.isEmpty()) { 
+        System.out.println("Nenhuma sessão registrada no histórico."); 
+        return; 
     }
+    
+    for (Sessao s : sessoes) {
+        System.out.println("ID: " + s.getId() + " | Paciente ID: " + s.getIdPaciente() + " | Data: " + s.getData() + " | Tipo: " + s.getTipoAtendimento());
+        System.out.println("🔄 Estado Atual: [" + s.getNomeEstado() + "]");
+        System.out.println("💰 Valor Base: R$ " + s.getValorBase() + " -> Repasse Líquido: R$ " + s.getValorLiquidoProfissional());
+        System.out.println("----------------------------------------------------------------");
+    }
+}
 
     
     

@@ -6,30 +6,31 @@ import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 public class DateUtils {
+    // Usaremos um formatador padrão para evitar erros de leitura em diferentes terminais
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public static LocalDate lerData(Scanner scanner, String mensagem) {
         while (true) {
             try {
                 System.out.print(mensagem + " (dd/MM/yyyy): ");
-                String entrada = scanner.nextLine();
+                String entrada = scanner.nextLine().trim(); // .trim() remove espaços extras
+                
                 LocalDate data = LocalDate.parse(entrada, FORMATTER);
 
-                // Regra de exemplo: Data não pode ser futura
                 if (data.isAfter(LocalDate.now())) {
                     System.out.println("❌ Erro: A data não pode ser futura!");
                     continue;
                 }
-                return data; // Se chegou aqui, a data é válida e segura
+                return data;
             } catch (DateTimeParseException e) {
-                System.out.println("❌ Erro: Formato inválido ou data inexistente. Tente novamente.");
+                System.out.println("❌ Erro: Formato inválido ou data inexistente. Tente o formato dd/MM/yyyy.");
             }
         }
     }
 
     public static LocalDate parse(String dataString) {
-    return LocalDate.parse(dataString, FORMATTER);
-}
+        return LocalDate.parse(dataString.trim(), FORMATTER);
+    }
 
     public static String formatar(LocalDate data) {
         return data.format(FORMATTER);
